@@ -1,0 +1,554 @@
+{
+  "name": "Email generation",
+  "nodes": [
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"subject\": \"Bedankt voor je aanvraag\",\n  \"body\": \"Beste Ralph...\",\n  \"id\": 1\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1600,
+        112
+      ],
+      "id": "91f59b76-41b0-41aa-b044-e4a87baaf078",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1456,
+        112
+      ],
+      "id": "12cbc28e-f869-4ca2-bd34-fef05aa6adf3",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "bSlvksAf1Xxt18qt",
+          "name": "Jesajatest@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "naam"
+            },
+            {
+              "name": "category"
+            },
+            {
+              "name": "email"
+            },
+            {
+              "name": "reason",
+              "type": "any"
+            },
+            {
+              "name": "website"
+            },
+            {
+              "name": "bedrijfsnaam"
+            },
+            {
+              "name": "financieringsbedrag"
+            },
+            {
+              "name": "financieringsdoel"
+            },
+            {
+              "name": "fte",
+              "type": "number"
+            },
+            {
+              "name": "bedrijfssamenvatting"
+            },
+            {
+              "name": "next_action"
+            },
+            {
+              "name": "status"
+            },
+            {
+              "name": "lead_id",
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "id": "9aac97e3-fcb6-4c63-a3e9-2808dbf65bfb",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        1040,
+        0
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5776ad69-331a-4746-9e21-bbe0aeac8c91",
+              "leftValue": "={{ $json.category }}",
+              "rightValue": "hot",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "a8d97248-7fa6-4de8-ac23-fcb0b3c5ed23",
+              "leftValue": "={{ $json.category }}",
+              "rightValue": "warm",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1248,
+        0
+      ],
+      "id": "9e9b625c-06a1-45c0-a083-58ef55649731",
+      "name": "lead hot of warm?"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={ \n  \"naam\": \"{{ $json.naam }}\",\n  \"email\": \"{{ $json.email }}\",\n  \"bedrijfsnaam\": \"{{ $json.bedrijfsnaam }}\",\n  \"website\": \"{{ $json.website }}\",\n  \"finacieringsbedrag\": \"{{ $json.financieringsbedrag }}\",\n  \"financieringsdoel\": \"{{ $json.financieringsdoel }}\",\n  \"fte\": {{ $json.fte }},\n  \"bedrijfssamenvatting\": \"{{ $json.bedrijfssamenvatting }}\",\n  \"category\": \"{{ $json.category }}\",\n  \"reason\": \"{{ $json.reason }}\",\n  \"id\": {{ $('Start').item.json.lead_id }}\n} ",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "##Je bent een ervaren Business Development Manager van Groeikapitaal Partners genaamd Sam.\n\nJe taak is om een professionele, persoonlijke en overtuigende e-mail te schrijven aan een potentiële klant die via onze website een financieringsaanvraag heeft ingediend.\n\n##Doel van de e-mail:\nHet uiteindelijke doel is om een kennismakingsgesprek in te plannen waarin we de financieringsmogelijkheden kunnen bespreken in het geval van geschikte kandidaten.\n\n##Je ontvangt onder andere de volgende informatie:\n\n* naam\n* bedrijfsnaam\n* website\n* financieringsbedrag\n* financieringsdoel\n* fte\n* bedrijfssamenvatting\n* category (hot of warm)\n* reason (reden van kwalificatie)\n\n##Richtlijnen:\n\n#1. Personaliseer de e-mail sterk.\n\n* Noem de naam van de contactpersoon.\n* Verwijs specifiek naar het bedrijf.\n* Verwijs naar het genoemde financieringsdoel.\n* Laat blijken dat je de aanvraag daadwerkelijk hebt gelezen.\n\n#2. Schrijf professioneel maar toegankelijk.\n\n* Zakelijke, maar casual toon.\n* Geen overdreven verkooppraatjes.\n* Geen generieke marketingtaal.\n\n#3. Creëer vertrouwen.\n\n* Benoem dat Groeikapitaal Partners ondernemers helpt bij het vinden van passende financieringsoplossingen.\n* Laat zien dat je begrijpt wat de ondernemer probeert te bereiken.\n\n#4. Focus op het gesprek.\n\n* Verkoop niet direct een financiering.\n* Verkoop het kennismakingsgesprek.\n* Maak duidelijk dat een gesprek bedoeld is om te onderzoeken of er een passende financieringsoplossing mogelijk is.\n\n#5. Gebruik de kwalificatie.\n\n* Bij HOT leads mag de e-mail enthousiaster en directer zijn.\n* Bij WARM leads mag de e-mail iets voorzichtiger zijn en meer gericht op verkenning.\n\n#6. Houd de e-mail compact.\n\n* Ongeveer 150-250 woorden.\n* Korte en duidelijke alinea'.\n* Makkelijk leesbaar.\n\n#7. Maak reageren zo makkelijk mogelijk.\n\n* Eindig de e-mail altijd met een eenvoudige en concrete vraag.\n* Vraag bij voorkeur naar beschikbaarheid voor een kennismakingsgesprek.\n* Nodig de lead uit om direct enkele geschikte momenten terug te sturen.\n* Vermijd open vragen zoals \"Laat maar weten als je interesse hebt.\"\n* Gebruik liever vragen zoals:\n\"Heb je volgende week 30 minuten beschikbaar voor een kennismaking?\"\n\"Welke dag komt voor jou het beste uit?\"\n\"Stuur gerust een paar momenten door die voor jou werken.\"\n\nHet doel is om de kans op een concrete reactie met beschikbaarheid zo groot mogelijk te maken.\n\n##Structuur:\n\n* Persoonlijke opening\n* Verwijzing naar de aanvraag\n* Korte toelichting waarom deze aanvraag interessant lijkt\n* Uitnodiging voor een kennismakingsgesprek\n* Professionele afsluiting\n\n##Retourneer uitsluitend geldige JSON in dit formaat:\n\n{\n\"subject\": \"Onderwerp van de e-mail\",\n\"body\": \"Volledige e-mailtekst\",\n\"id\": \"id van lead\"\n}\n\n#Voorbeeld van de gewenste schrijfstijl:\n\n\"Beste Ralph,\n\nBedankt voor je aanvraag. Ik heb met interesse gelezen dat AI Volution op zoek is naar financiering voor de ontwikkeling van een AI-gedreven ERP-oplossing voor de horecabranche.\n\nOp basis van de informatie die je hebt gedeeld lijkt er sprake van een onderneming met een duidelijke groeivisie en concrete plannen. Dat maakt het interessant om samen te onderzoeken welke financieringsmogelijkheden hierbij kunnen aansluiten.\n\nIk plan graag een vrijblijvend kennismakingsgesprek in om meer te horen over jullie plannen en om te kijken welke opties binnen ons investeerdersnetwerk passend kunnen zijn.\n\nMet vriendelijke groet,\n\nSam\nGroeikapitaal Partners\"\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1456,
+        -96
+      ],
+      "id": "3e1ba02f-d895-4697-ad72-6e7df38e93d8",
+      "name": "Email Agent"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "sendAndWait",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0B7R6ZTADC",
+          "mode": "list",
+          "cachedResultName": "leads-message-approval"
+        },
+        "message": "=NEW LEAD MESSAGE WAITING!\n\nLead Status: {{ $('Start').item.json.category }}\n\nNaam: {{ $('Start').item.json.naam }}\nEmail: {{ $('Start').item.json.email }}\nwebsite: {{ $('Start').item.json.website }}\nreason: {{ $('Start').item.json.reason }}\n\n\nEMAIL\nsubject: {{ $json.output.subject }}\n\n{{ $json.output.body }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Goedkeuren",
+            "disapproveLabel": "Afkeuren"
+          }
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        1808,
+        -96
+      ],
+      "id": "3b2706b3-72c4-4850-bbd0-c5d14e891738",
+      "name": "Email controle",
+      "webhookId": "d3d110d2-0e80-4520-9c73-5ee281d494c6",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "55YFMJtnPrfQIW9l",
+          "name": "Jesaja - Slack Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "HlpdZOnHqmLAvevk",
+          "mode": "list",
+          "cachedResultName": "communications",
+          "cachedResultUrl": "/projects/JDxnr5hTh79xtzhH/datatables/HlpdZOnHqmLAvevk"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "lead_email": "={{ $('Start').item.json.email }}",
+            "type": "outbound",
+            "subject": "={{ $('Email Agent').item.json.output.subject }}",
+            "body": "={{ $('Email Agent').item.json.output.body }}",
+            "lead_id": "={{ $('Start').item.json.lead_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "lead_email",
+              "displayName": "lead_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "type",
+              "displayName": "type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "body",
+              "displayName": "body",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2016,
+        -96
+      ],
+      "id": "d471e3e9-eb70-428a-bd9b-5ee1027b0fe1",
+      "name": "Agent email in tabel"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "1YVpRSM7iBRQ8dCx",
+          "mode": "list",
+          "cachedResultName": "leads",
+          "cachedResultUrl": "/projects/JDxnr5hTh79xtzhH/datatables/1YVpRSM7iBRQ8dCx"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "={{ $('Start').item.json.lead_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "email sent",
+            "next_action": "auto follow up after (-2 days)",
+            "fte": "={{ $('Start').item.json.fte }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "naam",
+              "displayName": "naam",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "bedrijfsnaam",
+              "displayName": "bedrijfsnaam",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "website",
+              "displayName": "website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "financieringsbedrag",
+              "displayName": "financieringsbedrag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "financieringsdoel",
+              "displayName": "financieringsdoel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fte",
+              "displayName": "fte",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "bedrijfssamenvatting",
+              "displayName": "bedrijfssamenvatting",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "reason",
+              "displayName": "reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "next_action",
+              "displayName": "next_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2224,
+        -96
+      ],
+      "id": "80498747-1c7e-4faa-a3d0-6f07f86eac7d",
+      "name": "Status update"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "lead hot of warm?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "lead hot of warm?": {
+      "main": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Agent": {
+      "main": [
+        [
+          {
+            "node": "Email controle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email controle": {
+      "main": [
+        [
+          {
+            "node": "Agent email in tabel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent email in tabel": {
+      "main": [
+        [
+          {
+            "node": "Status update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "eb207eaa-529f-4462-b3f4-b0ca5472f2dd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "eef16b049f74c69a6b3de9b9aa514a6d7ac07e702144e92c24e71d816048efe5"
+  },
+  "nodeGroups": [],
+  "id": "bwpguBuSpic6BrcN",
+  "tags": []
+}
