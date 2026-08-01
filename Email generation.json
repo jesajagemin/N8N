@@ -38,7 +38,7 @@
       "credentials": {
         "openAiApi": {
           "id": "bSlvksAf1Xxt18qt",
-          "name": "Jesajatest@gmail.com"
+          "name": "example@email.com"
         }
       }
     },
@@ -192,7 +192,7 @@
       ],
       "id": "3b2706b3-72c4-4850-bbd0-c5d14e891738",
       "name": "Email controle",
-      "webhookId": "d3d110d2-0e80-4520-9c73-5ee281d494c6",
+      "webhookId": "webhook id",
       "credentials": {
         "slackOAuth2Api": {
           "id": "55YFMJtnPrfQIW9l",
