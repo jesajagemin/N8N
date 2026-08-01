@@ -1,0 +1,363 @@
+{
+  "name": "AI email agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5f088d35-7cf6-4850-a846-dcabcff0f458",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1qgtrIj3drRBXLCsjWP6Fh-wHlCjghVmD",
+          "mode": "list",
+          "cachedResultName": "Test Email RAG - habihub_property_pack_plaintext_en_es.docx.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1qgtrIj3drRBXLCsjWP6Fh-wHlCjghVmD/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "9e48ee39-0924-4116-9888-47cdc2709f2c",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "fr3XIKLlm70MF3Ea",
+          "name": "Jesaja@blbsystems.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "987476cf-ac44-41d6-9055-edc5e2f7b5c2",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "eVmijmrXdqag2hWl",
+          "name": "Habihub Test connection - 02-04-26"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        560,
+        208
+      ],
+      "id": "2f6368be-52c1-4d97-8e69-73de6caf0ae7",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        288,
+        208
+      ],
+      "id": "fc949785-282a-4eb6-b493-4f72399da9c8",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "bSlvksAf1Xxt18qt",
+          "name": "Jesajatest@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.snippet }}",
+        "options": {
+          "systemMessage": "You are a helpful Habihub property agency assistant.\nYour goal is to provide costumers with property information you get throug incoming emails.\n\nAlways keep a professional and client friendly tone as is required in business emails.\n\n//LANGUAGE\nDetect the language.\n- If spanish respond in spanish\n- If any other language, respond in english\n\n//TOOL\nSupabase Vector Store\n\n//RULES\n-ALWAYS end the email with ths line: \"Best regards, The Habihub team\"\n- Only output is HTML for the email responses.\n- Make the text easy to read. i.e use new lines when pleasant.\n- Don't mention in the response that the output is HTML\n- Never hallucinate answers\n- Use the tool when answering property questions\n- Carefully follow the outpot format tool"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        368,
+        -320
+      ],
+      "id": "510750b0-cd68-4465-ba6c-6efebfca514a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        96,
+        -320
+      ],
+      "id": "52bcd7a9-37c2-46a4-9f47-b4943cc989b5",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "N2wrTVNPfai136eB",
+          "name": "Jesajatest@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        -144
+      ],
+      "id": "d0892ac9-68e0-4a0b-bcdd-f82bc9f93c73",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Ak9UG4m7Th5nQtVH",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Call this tool to look up property information",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        640,
+        -112
+      ],
+      "id": "33244b65-28fe-49da-80d3-84c6daa4b4c1",
+      "name": "Supabase Vector Store1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "eVmijmrXdqag2hWl",
+          "name": "Habihub Test connection - 02-04-26"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "jesajatest+1@gmail.com",
+        "subject": "=Re:  {{ $('Gmail Trigger').item.json.Subject }}",
+        "message": "=<p>Thanks for reaching out to Habihub!</p>\n<p>{{ $json.output }}</p>\n\n\n<p>\n  <img\n    src=\"https://www.habihub.com/static/media/logo-v1.63c2b4bd664d36012628.png\"\n    alt=\"Habihublogo\"\n    style=\"display:block; width:180px; height:auto; margin-top:12px;\"\n  >\n</p>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        720,
+        -320
+      ],
+      "id": "51b1919b-55fc-4144-961b-bba2b00f98d0",
+      "name": "Send a message",
+      "webhookId": "93a43573-ef69-42e1-8cf6-a5692bc884bc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "N2wrTVNPfai136eB",
+          "name": "Jesajatest@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.id }}",
+        "tableName": "n8n_habihubemail_histories"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        400,
+        -144
+      ],
+      "id": "9c9e542b-b232-4a12-9495-0494a74f86fa",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "C1Oyio9ir98PGw1A",
+          "name": "Habihub Postgres Test connection"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1cf12830-09cf-4c56-b49e-ca811058babb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "eef16b049f74c69a6b3de9b9aa514a6d7ac07e702144e92c24e71d816048efe5"
+  },
+  "nodeGroups": [],
+  "id": "CP1ARersXybBeFkh",
+  "tags": []
+}
